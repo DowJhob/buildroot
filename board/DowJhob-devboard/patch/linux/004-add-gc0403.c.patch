@@ -1,11 +1,9 @@
---- /dev/null	2023-10-20 21:25:17.304459219 +0700
-+++ a/drivers/media/i2c/gc0403.c	2023-05-27 18:49:51.985700000 +0700
-@@ -0,0 +1,1415@@
-+// SPDX-License-Identifier: GPL-2.0
+--- /dev/null	2024-02-17 15:48:00.714510445 +0700
++++ a/drivers/media/i2c/gc0403.c	2024-02-17 15:51:28.919858052 +0700
+@@ -0,0 +1,1408 @@
 +/*
 + * gc0403 driver
 + *
-+ * Copyright (C) 2019 Fuzhou Rockchip Electronics Co.,Ltd.
 + */
 +
 +#include <linux/clk.h>
@@ -70,7 +68,7 @@
 +#define GC0403_EXPOSURE_MIN		1
 +
 +#define GC0403_NAME			"gc0403"
-+#define DRIVER_VERSION			0, 0x01, 0x01
++#define DRIVER_VERSION			"2.0.0  - linux 6.4.16"
 +
 +#define GC0403_XVCLK_FREQ		24000000
 +#define GC0403_LINK_FREQ		96000000
@@ -617,7 +615,7 @@
 +}
 +
 +static int gc0403_set_fmt(struct v4l2_subdev *sd,
-+			  struct v4l2_subdev_pad_config *cfg,
++			  struct v4l2_subdev_state *state,
 +			  struct v4l2_subdev_format *fmt)
 +{
 +	struct gc0403 *gc0403 = to_gc0403(sd);
@@ -632,7 +630,7 @@
 +	fmt->format.field = V4L2_FIELD_NONE;
 +	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
 +#ifdef CONFIG_VIDEO_V4L2_SUBDEV_API
-+		*v4l2_subdev_get_try_format(sd, cfg, fmt->pad) = fmt->format;
++		*v4l2_subdev_get_try_format(sd, state, fmt->pad) = fmt->format;
 +#else
 +		mutex_unlock(&gc0403->mutex);
 +		return -ENOTTY;
@@ -647,7 +645,7 @@
 +}
 +
 +static int gc0403_get_fmt(struct v4l2_subdev *sd,
-+			  struct v4l2_subdev_pad_config *cfg,
++			  struct v4l2_subdev_state *state,
 +			  struct v4l2_subdev_format *fmt)
 +{
 +	struct gc0403 *gc0403 = to_gc0403(sd);
@@ -656,7 +654,7 @@
 +	mutex_lock(&gc0403->mutex);
 +	if (fmt->which == V4L2_SUBDEV_FORMAT_TRY) {
 +#ifdef CONFIG_VIDEO_V4L2_SUBDEV_API
-+		fmt->format = *v4l2_subdev_get_try_format(sd, cfg, fmt->pad);
++		fmt->format = *v4l2_subdev_get_try_format(sd, state, fmt->pad);
 +#else
 +		mutex_unlock(&gc0403->mutex);
 +		return -ENOTTY;
@@ -673,7 +671,7 @@
 +}
 +
 +static int gc0403_enum_mbus_code(struct v4l2_subdev *sd,
-+				 struct v4l2_subdev_pad_config *cfg,
++				 struct v4l2_subdev_state *state,
 +				 struct v4l2_subdev_mbus_code_enum *code)
 +{
 +	if (code->index != 0)
@@ -685,7 +683,7 @@
 +}
 +
 +static int gc0403_enum_frame_sizes(struct v4l2_subdev *sd,
-+				   struct v4l2_subdev_pad_config *cfg,
++				   struct v4l2_subdev_state *state,
 +				   struct v4l2_subdev_frame_size_enum *fse)
 +{
 +	if (fse->index >= ARRAY_SIZE(supported_modes))
@@ -966,8 +964,7 @@
 +static int gc0403_open(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh)
 +{
 +	struct gc0403 *gc0403 = to_gc0403(sd);
-+	struct v4l2_mbus_framefmt *try_fmt =
-+				v4l2_subdev_get_try_format(sd, fh->pad, 0);
++	struct v4l2_mbus_framefmt *try_fmt = v4l2_subdev_get_try_format(sd, fh->state, 0);
 +	const struct gc0403_mode *def_mode = &supported_modes[1];
 +
 +	mutex_lock(&gc0403->mutex);
@@ -1213,20 +1210,19 @@
 +	return 0;
 +}
 +
-+static int gc0403_configure_regulators(struct gc0403 *gc0403)
-+{
-+	unsigned int i;
++//static int gc0403_configure_regulators(struct gc0403 *gc0403)
++//{
++//	unsigned int i;
 +
-+	for (i = 0; i < GC0403_NUM_SUPPLIES; i++)
-+		gc0403->supplies[i].supply = gc0403_supply_names[i];
++//	for (i = 0; i < GC0403_NUM_SUPPLIES; i++)
++//		gc0403->supplies[i].supply = gc0403_supply_names[i];
 +
-+	return devm_regulator_bulk_get(&gc0403->client->dev,
-+				       GC0403_NUM_SUPPLIES,
-+				       gc0403->supplies);
-+}
++//	return devm_regulator_bulk_get(&gc0403->client->dev,
++//				       GC0403_NUM_SUPPLIES,
++//				       gc0403->supplies);
++//}
 +
-+static int gc0403_probe(struct i2c_client *client,
-+			const struct i2c_device_id *id)
++static int gc0403_probe(struct i2c_client *client)
 +{
 +	struct device *dev = &client->dev;
 +	/* add a dev_node */
@@ -1237,10 +1233,7 @@
 +	int ret;
 +
 +	/* add info */
-+	dev_info(dev, "driver version: %02x.%02x.%02x",
-+		DRIVER_VERSION >> 16,
-+		(DRIVER_VERSION & 0xff00) >> 8,
-+		DRIVER_VERSION & 0x00ff);
++	dev_info(dev, "driver version: %s", DRIVER_VERSION );
 +
 +	gc0403 = devm_kzalloc(dev, sizeof(*gc0403), GFP_KERNEL);
 +	if (!gc0403)
@@ -1357,7 +1350,7 @@
 +	return ret;
 +}
 +
-+static int gc0403_remove(struct i2c_client *client)
++static void gc0403_remove(struct i2c_client *client)
 +{
 +	struct v4l2_subdev *sd = i2c_get_clientdata(client);
 +	struct gc0403 *gc0403 = to_gc0403(sd);
@@ -1374,7 +1367,7 @@
 +		__gc0403_power_off(gc0403);
 +	pm_runtime_set_suspended(&client->dev);
 +
-+	return 0;
++	//return 0;
 +}
 +
 +#if IS_ENABLED(CONFIG_OF)
