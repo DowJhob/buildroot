@@ -926,7 +926,7 @@
 +	if (!IS_ERR(gc0403->pwdn_gpio))
 +		gpiod_set_value_cansleep(gc0403->pwdn_gpio, 1);
 +	clk_disable_unprepare(gc0403->xvclk);
-+	regulator_bulk_disable(GC0403_NUM_SUPPLIES, gc0403->supplies);
++//	regulator_bulk_disable(GC0403_NUM_SUPPLIES, gc0403->supplies);
 +}
 +
 +static int gc0403_runtime_resume(struct device *dev)

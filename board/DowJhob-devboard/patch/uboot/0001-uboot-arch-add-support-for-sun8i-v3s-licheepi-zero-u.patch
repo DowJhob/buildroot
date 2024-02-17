@@ -1,0 +1,18 @@
+--- a/arch/arm/dts/Makefile	2020-07-07 02:22:53.000000000 +0700
++++ b/arch/arm/dts/Makefile	2020-07-07 02:22:53.000000000 +0700
+@@ -721,3 +721,3 @@
+ 	sun8i-v3-sl631-imx179.dtb \
+-	sun8i-v3s-licheepi-zero.dtb
++	sun8i-v3s-licheepi-zero-uboot.dtb
+ 	dtb-$(CONFIG_MACH_SUN50I_H5) += \
+
+--- /dev/null
++++ b/image.map
+@@ -0,0 +1,4 @@
++ImagePos    Offset      Size  Name
++00000000  00000000  000657eb  main-section
++00000000   00000000  00006000  blob
++00008000   00008000  0005d7eb  u-boot-img
+-- 
+2.17.1
+

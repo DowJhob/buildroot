@@ -1,0 +1,9 @@
+--- a/arch/arm/mach-sunxi/Kconfig	2020-07-07 02:22:53.000000000 +0700
++++ a/arch/arm/mach-sunxi/Kconfig	2023-10-13 11:59:47.527575000 +0700
+@@ -1030,5 +1030,5 @@
+ 
+ config SPL_SPI_SUNXI
+ 	bool "Support for SPI Flash on Allwinner SoCs in SPL"
+-	depends on MACH_SUN4I || MACH_SUN5I || MACH_SUN7I || MACH_SUNXI_H3_H5 || MACH_SUN50I || MACH_SUN8I_R40 || SUN50I_GEN_H6 || MACH_SUNIV
++	depends on MACH_SUN4I || MACH_SUN5I || MACH_SUN7I || MACH_SUNXI_H3_H5 || MACH_SUN50I || MACH_SUN8I_R40 || SUN50I_GEN_H6 || MACH_SUNIV || MACH_SUN8I_V3S
+ 	help
