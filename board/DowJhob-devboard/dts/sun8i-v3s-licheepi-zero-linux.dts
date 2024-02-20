@@ -81,43 +81,6 @@
 
 };
 
-&csi1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&csi1_8bit_pins>;
-	status = "okay";
-
-	port {
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		csi1_ep: endpoint {
-			remote-endpoint = <&gc0403_ep>;
-			//data-shift = <4>;
-			bus-width = <8>;                              // number of data lines actively used, valid for the parallel busses.
-			hsync-active = <1>;                           // active state of the HSYNC signal, 0/1 for LOW/HIGH respectively.
-			vsync-active = <0>;                           // active state of the VSYNC signal, 0/1 for LOW/HIGH respectively.
-			data-active = <1>;                            // similar to HSYNC and VSYNC, specifies data line polarity.
-			pclk-sample = <1>;                            // sample data on rising (1) or falling (0) edge of the pixel clock signal.
-		};
-	};	
-	
-};
-
-&isp {
-        ports {
-            #address-cells = <1>;
-            #size-cells = <0>;
-
-            port@0 {
-                reg = <0>;
-
-                isp_in_csi0: endpoint {
-                    remote-endpoint = <&gc0403_ep>;
-                };
-            };
-        };
-    };
-    
 &i2c1 {
 	pinctrl-0 = <&i2c1_pe_pins>;
 	pinctrl-names = "default";
@@ -128,41 +91,101 @@
 	gc0403: camera@3c {
 		compatible = "galaxycore,gc0403";
 		reg = <0x3c>;
-
+		
 		rockchip,camera-module-index = <0>;
 		rockchip,camera-module-facing = "front";
 		rockchip,camera-module-name = "Galaxycore gc0403";
 		rockchip,camera-module-lens-name = "== ? --";
-
+		
 		pinctrl-names = "default";
 		pinctrl-0 = <&csi1_mclk_pin>;
-
-
-//        	clocks = <&ccu CLK_CSI1_MCLK>;
-        	clocks = <&ccu CLK_CSI0_MCLK>;              // need for PE20
+		
+//		clocks = <&ccu CLK_CSI1_MCLK>;
+		clocks = <&ccu CLK_CSI0_MCLK>;              // need for PE20
 		clock-names = "xvclk";
-
-//	        assigned-clocks = <&ccu CLK_CSI1_MCLK>;
-//	        assigned-clocks = <&ccu CLK_CSI0_MCLK>;
-//	        assigned-clock-rates = <24000000>;
 
 		powerdown-gpios = <&pio 4 17 GPIO_ACTIVE_HIGH>; /* PE17 */  // pwdn name dont be effect
 		reset-gpios = <&pio 4 16 GPIO_ACTIVE_HIGH>;
 
 		port {
 			gc0403_ep: endpoint {
-				remote-endpoint = <&csi1_ep>;
-				bus-width = <8>;                              // number of data lines actively used, valid for the parallel busses.
-				//data-shift = <4>;
-				hsync-active = <1>;                           // active state of the HSYNC signal, 0/1 for LOW/HIGH respectively.
-				vsync-active = <0>;                           // active state of the VSYNC signal, 0/1 for LOW/HIGH respectively.
-				data-active = <1>;                            // similar to HSYNC and VSYNC, specifies data line polarity.
-				pclk-sample = <1>;                            // sample data on rising (1) or falling (0) edge of the pixel clock signal.
+				remote-endpoint = <&csi1_in_ep>;
+				bus-type = <5>;					// Parallel
+				bus-width = <8>;				// number of data lines actively used, valid for the parallel busses.
+				data-shift = <4>;
+				hsync-active = <1>;				// active state of the HSYNC signal, 0/1 for LOW/HIGH respectively.
+				vsync-active = <0>;				// active state of the VSYNC signal, 0/1 for LOW/HIGH respectively.
+				data-active = <1>;				// similar to HSYNC and VSYNC, specifies data line polarity.
+				pclk-sample = <1>;				// sample data on rising (1) or falling (0) edge of the pixel clock signal.
 			};
 		};
 	};
 };
 
+&csi1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&csi1_8bit_pins>;
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		
+		port@0 {
+			reg = <0>;
+			/* Parallel bus endpoint */
+
+			csi1_in_ep: endpoint {
+				remote-endpoint = <&gc0403_ep>;
+				bus-type = <5>;					// Parallel
+				data-shift = <4>;
+				bus-width = <8>;				// number of data lines actively used, valid for the parallel busses.
+				hsync-active = <1>;				// active state of the HSYNC signal, 0/1 for LOW/HIGH respectively.
+				vsync-active = <0>;				// active state of the VSYNC signal, 0/1 for LOW/HIGH respectively.
+				data-active = <1>;				// similar to HSYNC and VSYNC, specifies data line polarity.
+				pclk-sample = <1>;				// sample data on rising (1) or falling (0) edge of the pixel clock signal.
+			};
+		};
+		
+		port@1{				// description: MIPI CSI-2 bridge input port
+			reg = <1>;
+		};
+
+		port@2 {			// https://mjmwired.net/kernel/Documentation/devicetree/bindings/media/allwinner,sun6i-a31-csi.yaml
+			reg = <2>;
+
+//			csi1_out_ep: endpoint {
+//				remote-endpoint = <&isp_in>;
+//			};
+		};
+	};
+};
+
+//&isp {
+//	status = "okay";
+	
+//	ports {
+//		#address-cells = <1>;
+//		#size-cells = <0>;
+
+//		port@0 {
+//			reg = <0>;
+//			isp_in: endpoint {
+////				remote-endpoint = <&csi1_in_ep>;
+//				remote-endpoint = <&csi1_out_ep>;
+//			};
+//		};
+		
+//		port@1 {			// https://mjmwired.net/kernel/Documentation/devicetree/bindings/media/allwinner,sun6i-a31-isp.yaml
+//			reg = <1>;
+
+////			isp_in: endpoint {
+////				remote-endpoint = <&csi1_in_ep>;
+////				remote-endpoint = <&csi1_out_ep>;
+////			};
+//		};
+//	};
+//};
 
 &spi0 {
 	status = "okay";
