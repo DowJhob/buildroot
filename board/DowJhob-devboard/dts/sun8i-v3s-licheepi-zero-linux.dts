@@ -126,17 +126,33 @@
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&csi1_8bit_pins>;
+		
+//	port {
+//		reg = <0>;
+//		/* Parallel bus endpoint */
+
+//		csi1_in_ep: endpoint {
+//			remote-endpoint = <&gc0403_ep>;
+//			bus-type = <5>;					// Parallel
+//			data-shift = <4>;
+//			bus-width = <8>;				// number of data lines actively used, valid for the parallel busses.
+//			hsync-active = <1>;				// active state of the HSYNC signal, 0/1 for LOW/HIGH respectively.
+//			vsync-active = <0>;				// active state of the VSYNC signal, 0/1 for LOW/HIGH respectively.
+//			data-active = <1>;				// similar to HSYNC and VSYNC, specifies data line polarity.
+//			pclk-sample = <1>;				// sample data on rising (1) or falling (0) edge of the pixel clock signal.
+//		};
+//	};
 
 	ports {
 		#address-cells = <1>;
 		#size-cells = <0>;
-		
+
 		port@0 {
 			reg = <0>;
 			/* Parallel bus endpoint */
 
 			csi1_in_ep: endpoint {
-				remote-endpoint = <&gc0403_ep>;
+			remote-endpoint = <&gc0403_ep>;
 				bus-type = <5>;					// Parallel
 				data-shift = <4>;
 				bus-width = <8>;				// number of data lines actively used, valid for the parallel busses.
@@ -147,45 +163,45 @@
 			};
 		};
 		
-		port@1{				// description: MIPI CSI-2 bridge input port
-			reg = <1>;
-		};
+//		port@1{				// description: MIPI CSI-2 bridge input port
+//			reg = <1>;
+//		};
 
 		port@2 {			// https://mjmwired.net/kernel/Documentation/devicetree/bindings/media/allwinner,sun6i-a31-csi.yaml
 			reg = <2>;
 
-//			csi1_out_ep: endpoint {
-//				remote-endpoint = <&isp_in>;
-//			};
+			csi1_out_ep: endpoint {
+				remote-endpoint = <&isp_in>;
+			};
 		};
 	};
 };
 
-//&isp {
-//	status = "okay";
+&isp {
+	status = "okay";
 	
-//	ports {
-//		#address-cells = <1>;
-//		#size-cells = <0>;
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
 
-//		port@0 {
-//			reg = <0>;
+		port@0 {
+			reg = <0>;
 //			isp_in: endpoint {
 ////				remote-endpoint = <&csi1_in_ep>;
 //				remote-endpoint = <&csi1_out_ep>;
 //			};
-//		};
+		};
 		
-//		port@1 {			// https://mjmwired.net/kernel/Documentation/devicetree/bindings/media/allwinner,sun6i-a31-isp.yaml
-//			reg = <1>;
+		port@1 { 			// https://mjmwired.net/kernel/Documentation/devicetree/bindings/media/allwinner,sun6i-a31-isp.yaml
+			reg = <1>;
 
-////			isp_in: endpoint {
-////				remote-endpoint = <&csi1_in_ep>;
-////				remote-endpoint = <&csi1_out_ep>;
-////			};
-//		};
-//	};
-//};
+			isp_in: endpoint {
+//				remote-endpoint = <&csi1_in_ep>;
+				remote-endpoint = <&csi1_out_ep>;
+			};
+		};
+	};
+};
 
 &spi0 {
 	status = "okay";
@@ -223,18 +239,17 @@
 
 			partition@3 {
 				label = "rootfs";
-//				reg = <0x360000 0x880000>;
-//				reg = <0x360000 0xCA0000>;
-//				reg = <0x360000 0xC50000>;
-				reg = <0x360000 0x1A00000>;
+				reg = <0x360000 0x1B00000>;
+//				reg = <0x360000 0x1A00000>;
 //				read-only;
 			};
 
 			partition@4 {
 				label = "home";
-//				reg = <0xfb0000 0x50000>;
-//				reg = <0x1000000 0x1000000>;
-				reg = <0x1D60000 0x2A0000>;
+				reg = <0x1E60000 0x1A0000>;
+//				reg = <0x1D60000 0x2A0000>;
+
+//				read-only;
 			};
 		};
 	};
